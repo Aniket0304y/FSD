@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            height: 100vh; 
+            margin: 0;
+            display: flex;
+            justify-content: center; 
+            align-items: center; 
+            background-color: #f1cccc; 
+        }
+
+        div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: greenyellow;
+            padding: 20px;
+            width: fit-content;
+            border-radius: 15px;
+        }
+
+        section {
+            display: block;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        label {
+            display: inline-block;
+            width: 150px;
+            text-align: right;
+            margin-right: 10px;
+        }
+
+        input, textarea {
+            display: inline-block;
+            width: 300px;
+            padding: 5px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+       
+        input:hover, textarea:hover {
+            border-color: #4CAF50; /* Green border on hover */
+            box-shadow: 0px 0px 5px rgba(76, 175, 80, 0.5); /* Green glow on hover */
+        }
+
+       
+        input:focus, textarea:focus {
+            border-color: #2196F3; 
+            box-shadow: 0px 0px 5px rgba(33, 150, 243, 0.5);
+            outline: none;
+        }
+
+        hr {
+            width: 100%;
+            border: 1px solid #000;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <section>
+            <h4>Step-1: Your Details</h4>
+            <label for="imp1">Your name :</label>
+            <input type="text" id="imp1" name="Name" placeholder="Your name........"><br>
+            <label for="E-mail">E-mail:</label>
+            <input type="text" id="E-mail" placeholder="abcd@gmail.com"><br>
+            <label for="imp2">Phone :</label>
+            <input type="text" id="imp2" name="Phone" placeholder="879**"><br>
+            <hr>
+        </section>
+
+        <section>
+            <h4>Step-2: Delivery Address</h4>
+            <label for="Address">Address:</label>
+            <textarea name="Address" id="Address" cols="30" rows="2"></textarea><br>
+            <label for="Post Code">Post Code:</label>
+            <textarea name="Post Code" id="Post Code" cols="30" rows="1"></textarea><br>
+            <label for="country">Country:</label>
+            <input type="text" id="country"><br>
+            <hr>
+        </section>
+
+        <section>
+            <h4>Step-3: Card Details</h4>
+            <label for="card-number">Card Number:</label>
+            <input type="text" id="card-number" name="card-number" placeholder="123**"><br>
+            <label for="security-code">Security Code:</label>
+            <input type="password" id="security-code" name="security code" placeholder=""><br>
+            <label for="name">Name On The Card:</label>
+            <input type="text" id="name" name="name" placeholder="Exact Name On The Card"><br>
+        </section>
+    </div>
+</body>
+</html>
