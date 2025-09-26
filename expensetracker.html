@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Simple Expense Tracker</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#06b6d4;--muted:#94a3b8;--glass:rgba(255,255,255,0.03)}
+    *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial}
+    body{margin:0;background:linear-gradient(180deg,#071023 0%,#081526 100%);color:#e6eef6;padding:28px}
+    .app{max-width:980px;margin:0 auto;display:grid;grid-template-columns:1fr 380px;gap:20px}
+    header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between}
+    h1{margin:0;font-size:20px;letter-spacing:0.2px}
+    .card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(2,6,23,0.6)}
+    form .row{display:flex;gap:10px}
+    label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
+    input,select,button,textarea{background:var(--glass);border:1px solid rgba(255,255,255,0.04);color:inherit;padding:10px;border-radius:8px}
+    input[type=number]{-moz-appearance:textfield}
+    .muted{color:var(--muted);font-size:13px}
+    .summary{display:flex;gap:10px;margin-top:12px}
+    .summary .box{flex:1;padding:12px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent)}
+    .list{max-height:420px;overflow:auto;margin-top:12px}
+    .txn{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:8px;margin-bottom:8px;background:rgba(255,255,255,0.02)}
+    .txn small{color:var(--muted)}
+    .actions button{margin-left:8px}
+    .filter{display:flex;gap:8px;align-items:flex-end}
+    .chart-wrap{margin-top:12px}
+    .controls{display:flex;gap:8px;align-items:center}
+    .full{width:100%;}
+    .danger{background:#4c1f1f}
+    .success{background:#0b4f2f}
+    .btn{cursor:pointer}
+    #type{background-color: #0f1724;}
+    .full{background-color: #0f1724;}
+    #filterCategory{background-color: #0f1724;}
+    footer{grid-column:1/-1;text-align:center;color:var(--muted);margin-top:18px;font-size:13px}
+    @media (max-width:920px){.app{grid-template-columns:1fr;padding:12px}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Expense Tracker</h1>
+      <div class="muted">Local-only • data saved to <code>localStorage</code></div>
+    </header>
+
+    <section class="card" aria-labelledby="add"> 
+      <h3 id="add">Add Transaction</h3>
+      <form id="txnForm">
+        <div class="row" style="margin-top:8px">
+          <div style="flex:1">
+            <label>Amount</label>
+            <input type="number" id="amount" placeholder="e.g. 250" required step="0.01" />
+          </div>
+          <div style="width:140px">
+            <label>Type</label>
+            <select id="type">
+              <option value="expense">Expense</option>
+              <option value="income">Income</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <div style="flex:1">
+            <label>Category</label>
+            <select id="category" class="full">
+                <div class="full">
+              <option value="food">Food</option>
+              <option value="rent">Rent</option>
+              <option value="transport">Transport</option>
+              <option value="salary">Salary</option>
+              <option value="entertainment">Entertainment</option>
+              <option value="other">Other</option>
+              </div>
+            </select>
+          </div>
+          <div style="width:180px">
+            <label>Date</label>
+            <input type="date" id="date" />
+          </div>
+        </div>
+
+        <div style="margin-top:10px">
+          <label>Description</label>
+          <input id="description" placeholder="Optional note" />
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn" id="saveBtn">Save</button>
+          <button type="button" id="clearBtn">Clear Form</button>
+          <button type="button" id="exportBtn">Export CSV</button>
+        </div>
+      </form>
+
+      <div class="summary">
+        <div class="box">
+          <div class="muted">Balance</div>
+          <div id="balance" style="font-size:20px;margin-top:6px">₹0.00</div>
+        </div>
+        <div class="box">
+          <div class="muted">Total Income</div>
+          <div id="income">₹0.00</div>
+        </div>
+        <div class="box">
+          <div class="muted">Total Expense</div>
+          <div id="expense">₹0.00</div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px" class="filter">
+        <div>
+          <label>Filter Month</label>
+          <input type="month" id="filterMonth">
+        </div>
+        <div>
+          <label>Category</label>
+          <select id="filterCategory">
+            <option value="all">All</option>
+            <option value="food">Food</option>
+            <option value="rent">Rent</option>
+            <option value="transport">Transport</option>
+            <option value="salary">Salary</option>
+            <option value="entertainment">Entertainment</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="controls">
+          <button id="applyFilter">Apply</button>
+          <button id="resetFilter">Reset</button>
+        </div>
+      </div>
+
+      <div class="list" id="list"></div>
+    </section>
+
+    <aside class="card">
+      <h3>Quick Chart</h3>
+      <div class="chart-wrap">
+        <canvas id="pie" width="320" height="320"></canvas>
+      </div>
+
+      <h3 style="margin-top:14px">Quick Controls</h3>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+        <button id="seedBtn">Seed Example Data</button>
+        <button id="clearAll" class="danger">Clear All Data</button>
+        <button id="downloadBackup">Download Backup (JSON)</button>
+      </div>
+
+      <p class="muted" style="margin-top:12px">Tip: this is a client-only demo — data never leaves your browser.</p>
+    </aside>
+
+    <footer>Built for quick prototyping • Modify as you like</footer>
+  </div>
+
+  <script>
+    // Simple expense tracker storing transactions in localStorage
+    const LS_KEY = 'simple_expense_txns_v1';
+    const form = document.getElementById('txnForm');
+    const amountIn = document.getElementById('amount');
+    const typeIn = document.getElementById('type');
+    const catIn = document.getElementById('category');
+    const dateIn = document.getElementById('date');
+    const descIn = document.getElementById('description');
+    const listEl = document.getElementById('list');
+    const balanceEl = document.getElementById('balance');
+    const incomeEl = document.getElementById('income');
+    const expenseEl = document.getElementById('expense');
+    const pieCanvas = document.getElementById('pie');
+
+    const filterMonth = document.getElementById('filterMonth');
+    const filterCategory = document.getElementById('filterCategory');
+
+    let editingId = null;
+
+    function loadTxns(){
+      try{
+        const raw = localStorage.getItem(LS_KEY);
+        return raw? JSON.parse(raw): [];
+      }catch(e){return []}
+    }
+
+    function saveTxns(txns){
+      localStorage.setItem(LS_KEY, JSON.stringify(txns));
+    }
+
+    function uid(){return Math.random().toString(36).slice(2,9)}
+
+    function formatCurrency(n){
+      const num = Number(n)||0;
+      return '₹' + num.toFixed(2);
+    }
+
+    function todayISO(){
+      const d = new Date();
+      return d.toISOString().slice(0,10);
+    }
+
+    function renderList(txns){
+      listEl.innerHTML = '';
+      if(!txns.length){ listEl.innerHTML = '<div class="muted">No transactions found.</div>'; return; }
+      txns.slice().reverse().forEach(t=>{
+        const div = document.createElement('div'); div.className='txn';
+        const left = document.createElement('div');
+        left.innerHTML = `<div><strong>${t.type==='income'?'+':'-'} ${formatCurrency(t.amount)}</strong></div><small>${t.category} • ${t.date}</small><div class="muted">${t.description||''}</div>`;
+        const right = document.createElement('div'); right.className='actions';
+        const edit = document.createElement('button'); edit.textContent='Edit'; edit.className='btn'; edit.onclick=()=>startEdit(t.id);
+        const del = document.createElement('button'); del.textContent='Delete'; del.className='btn'; del.onclick=()=>deleteTxn(t.id);
+        right.appendChild(edit); right.appendChild(del);
+        div.appendChild(left); div.appendChild(right);
+        listEl.appendChild(div);
+      })
+    }
+
+    function computeSummary(txns){
+      let income=0, expense=0;
+      txns.forEach(t=>{ if(t.type==='income') income += Number(t.amount); else expense += Number(t.amount); });
+      balanceEl.textContent = formatCurrency(income - expense);
+      incomeEl.textContent = formatCurrency(income);
+      expenseEl.textContent = formatCurrency(expense);
+    }
+
+    function drawPie(txns){
+      const ctx = pieCanvas.getContext('2d');
+      const categories = {};
+      txns.filter(t=>t.type==='expense').forEach(t=>{ categories[t.category] = (categories[t.category]||0) + Number(t.amount); });
+      const entries = Object.entries(categories);
+      ctx.clearRect(0,0,pieCanvas.width,pieCanvas.height);
+      if(entries.length===0){ ctx.font='14px sans-serif'; ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.fillText('No expense data',100,160); return; }
+      const total = entries.reduce((s,[_k,v])=>s+v,0);
+      let start= -0.5 * Math.PI;
+      entries.forEach(([,v],i)=>{
+        const slice = (v/total) * Math.PI*2;
+        // generate color from index
+        const hue = (i*67) % 360;
+        ctx.beginPath();
+        ctx.moveTo(pieCanvas.width/2,pieCanvas.height/2);
+        ctx.arc(pieCanvas.width/2,pieCanvas.height/2,120,start,start+slice);
+        ctx.closePath();
+        ctx.fillStyle = `hsl(${hue} 70% 50%)`;
+        ctx.fill();
+        start += slice;
+      });
+      // legend
+      let y=20; ctx.font='12px sans-serif';
+      entries.forEach(([k,v],i)=>{
+        const hue = (i*67)%360; ctx.fillStyle = `hsl(${hue} 70% 50%)`;
+        ctx.fillRect(10,y-10,10,10);
+        ctx.fillStyle='rgba(255,255,255,0.85)';
+        ctx.fillText(`${k} — ${formatCurrency(v)}`,28,y);
+        y+=18;
+      })
+    }
+
+    function refresh(){
+      let txns = loadTxns();
+      // apply filters
+      const fm = filterMonth.value; const fc = filterCategory.value;
+      if(fm){ txns = txns.filter(t=> t.date.slice(0,7) === fm); }
+      if(fc && fc!=='all'){ txns = txns.filter(t=> t.category === fc); }
+      renderList(txns);
+      computeSummary(txns);
+      drawPie(txns);
+    }
+
+    function startEdit(id){
+      const txns = loadTxns(); const t = txns.find(x=>x.id===id); if(!t) return;
+      editingId = id;
+      amountIn.value = t.amount; typeIn.value = t.type; catIn.value = t.category; dateIn.value = t.date; descIn.value = t.description || '';
+      document.getElementById('saveBtn').textContent = 'Update';
+    }
+
+    function deleteTxn(id){
+      if(!confirm('Delete this transaction?')) return;
+      let txns = loadTxns(); txns = txns.filter(t=>t.id!==id); saveTxns(txns); refresh();
+    }
+
+    form.addEventListener('submit',e=>{
+      e.preventDefault();
+      const amt = Number(amountIn.value);
+      if(!amt || isNaN(amt)){ alert('Enter valid amount'); return; }
+      const t = { id: editingId||uid(), amount:Math.abs(amt), type: typeIn.value, category:catIn.value, date: dateIn.value || todayISO(), description: descIn.value };
+      let txns = loadTxns();
+      if(editingId){ txns = txns.map(x=> x.id===editingId? t : x); editingId=null; document.getElementById('saveBtn').textContent='Save'; }
+      else txns.push(t);
+      saveTxns(txns); form.reset(); refresh();
+    });
+
+    document.getElementById('clearBtn').addEventListener('click',()=>{ form.reset(); editingId=null; document.getElementById('saveBtn').textContent='Save'; });
+    document.getElementById('applyFilter').addEventListener('click',refresh);
+    document.getElementById('resetFilter').addEventListener('click',()=>{ filterMonth.value=''; filterCategory.value='all'; refresh(); });
+
+    document.getElementById('seedBtn').addEventListener('click',()=>{
+      const sample = [
+        {id:uid(),amount:500,type:'income',category:'salary',date:'2025-09-01',description:'September salary'},
+        {id:uid(),amount:120,type:'expense',category:'food',date:'2025-09-02',description:'Dinner'},
+        {id:uid(),amount:700,type:'expense',category:'rent',date:'2025-09-03',description:'House rent'},
+        {id:uid(),amount:60,type:'expense',category:'transport',date:'2025-09-05',description:'Uber'},
+        {id:uid(),amount:150,type:'expense',category:'entertainment',date:'2025-09-06',description:'Movie'},
+      ];
+      saveTxns(sample); refresh();
+    });
+
+    document.getElementById('clearAll').addEventListener('click',()=>{ if(confirm('Clear all saved transactions?')){ localStorage.removeItem(LS_KEY); refresh(); } });
+
+    document.getElementById('downloadBackup').addEventListener('click',()=>{
+      const data = localStorage.getItem(LS_KEY) || '[]';
+      const blob = new Blob([data],{type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download='expense-backup.json'; a.click(); URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('exportBtn').addEventListener('click',()=>{
+      const txns = loadTxns(); if(!txns.length){ alert('No data to export'); return; }
+      const csv = ['id,type,amount,category,date,description', ...txns.map(t=> `${t.id},${t.type},${t.amount},${t.category},${t.date},"${(t.description||'').replace(/"/g,'""')}"`) ].join('\n');
+      const blob = new Blob([csv],{type:'text/csv'}); const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download='transactions.csv'; a.click(); URL.revokeObjectURL(url);
+    });
+
+    // initial render
+    if(!localStorage.getItem(LS_KEY)){
+      // optional: set date input default to today
+      dateIn.value = todayISO();
+    }
+    refresh();
+  </script>
+</body>
+</html>
